@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IMG2Banner — Single File</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+/* Inlined style.css */
+:root{
+  --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#7c5cff; --glass:rgba(255,255,255,0.04);
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; margin:0; background:linear-gradient(180deg,#071026 0%, #071934 100%); color:#e6eef8}
+.app{display:flex;gap:24px;padding:28px;max-width:1100px;margin:20px auto}
+.panel{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 6px 30px rgba(2,6,23,0.6);flex:1}
+.panel.left{max-width:420px}
+.brand h1{margin:0;font-size:20px;letter-spacing:0.4px}
+.brand p{margin:6px 0 18px;color:var(--muted);font-size:13px}
+.theme-toggle{margin-top:8px;font-size:13px;color:var(--muted)}
+.theme-toggle .theme-btn{background:var(--glass);border:none;padding:8px;border-radius:10px;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .2s ease, background .2s}
+.theme-toggle .theme-btn{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:none;padding:8px;border-radius:12px;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .25s ease, background .25s, box-shadow .25s}
+.theme-toggle .theme-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.12)}
+.theme-toggle .theme-btn svg{display:block}
+.theme-toggle .theme-btn .icon-moon{opacity:0;transform:scale(.8);transition:opacity .25s, transform .25s}
+.theme-toggle .theme-btn[aria-pressed="true"] .icon-moon{display:block;opacity:1;transform:scale(1)}
+.theme-toggle .theme-btn[aria-pressed="true"] .icon-sun{opacity:0;transform:scale(.8)}
+.uploader{border:2px dashed rgba(255,255,255,0.06);padding:20px;border-radius:10px;text-align:center;position:relative}
+.uploader input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:1}
+.hint{padding:28px 8px;color:var(--muted)}
+.controls{margin-top:16px}
+.control-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
+.control-row:last-child{border-bottom:none}
+.control-row label{font-weight:600;color:#dbe9ff}
+.control-row .inputs{display:flex;gap:8px;align-items:center}
+input[type=number]{width:80px;padding:6px 8px;border-radius:8px;border:none;background:var(--glass);color:var(--muted)}
+input[type=range]{width:160px}
+input[type=color]{width:40px;height:34px;border-radius:6px;border:none;padding:0}
+.buttons{gap:8px;display:flex}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:transparent;color:var(--muted);cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#4dd6ff);color:#041025;font-weight:700}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+.panel.right{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.canvas-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:360px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px}
+#mainCanvas{background:transparent;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.overlay{position:absolute;top:12px;left:12px;color:var(--muted);font-size:13px}
+.meta{margin-top:12px;color:var(--muted);font-size:13px}
+
+.editor-area{margin-top:12px;display:flex;flex-direction:column;align-items:center}
+.editor-area .editor-label{font-size:12px;color:var(--muted);margin-bottom:8px}
+#editorCanvas{background:linear-gradient(45deg,#ffffff08 25%, transparent 25%, transparent 75%, #ffffff08 75%, #ffffff08), linear-gradient(45deg,#ffffff08 25%, transparent 25%, transparent 75%, #ffffff08 75%, #ffffff08); background-size:16px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); box-shadow: 0 6px 18px rgba(2,6,23,0.6); position:relative; z-index:3; width:120px; height:120px}
+
+.control-row select{padding:6px 10px;border-radius:8px;border:none;background:var(--glass);color:var(--muted)}
+.hint{font-size:13px}
+.uploader .editor-area{margin-top:12px}
+.uploader .editor-label{font-size:12px;color:var(--muted);margin-bottom:8px}
+
+/* mobile hint */
+.editor-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+
+.theme-toggle-right{display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px}
+.action-buttons{display:flex;gap:8px;align-items:center}
+
+.topbar{position:fixed;right:18px;top:14px;z-index:1000}
+.theme-top{display:flex;align-items:center;gap:8px;background:transparent;padding:6px 8px;border-radius:12px}
+.theme-top .theme-btn{padding:8px;border-radius:10px}
+.theme-label{font-size:13px;color:var(--muted);margin-left:6px}
+
+@media(max-width:880px){.topbar{right:12px;top:12px}}
+
+
+@media(max-width:880px){.app{flex-direction:column;padding:12px}.panel.left{max-width:none}}
+
+/* Light theme overrides */
+[data-theme="light"]{
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --muted: #475569;
+  --accent: #5b21b6;
+  --glass: rgba(10,14,20,0.03);
+}
+
+/* 左侧在浅色主题时字体颜色更深一些 */
+[data-theme="light"] .panel.left{color:#0b1220}
+[data-theme="light"] .panel.left .hint{color:#334155}
+[data-theme="light"] .panel.left .control-row label{color:#0b1220}
+
+[data-theme="light"] .theme-toggle .theme-btn{ color: #0b1220; background: linear-gradient(180deg,#f4f6fb, #ffffff); box-shadow: 0 6px 18px rgba(11,18,32,0.06); }
+[data-theme="light"] .uploader{ border-color: rgba(11,18,32,0.08); background: linear-gradient(180deg,#ffffff, #fbfdff); }
+[data-theme="light"] #editorCanvas{ border-color: rgba(11,18,32,0.06); box-shadow: 0 6px 18px rgba(11,18,32,0.06); }
+
+[data-theme="light"] body{background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%); color:#0b1220}
+
+  </style>
+</head>
+<body>
+  <!-- Single-file HTML bundle of IMG2Banner -->
+  <div class="topbar">
+    <div class="theme-top">
+      <button id="themeToggle" class="theme-btn" aria-label="切换主题" aria-pressed="false">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+      </button>
+      <span class="theme-label">切换主题</span>
+    </div>
+  </div>
+  <main class="app">
+    <section class="panel left">
+      <div class="brand">
+        <h1>IMG2Banner</h1>
+        <p>把正方形图片置中到可配置画布，导出 PNG / WebP</p>
+      </div>
+
+      <div class="uploader" id="dropArea">
+        <input id="fileInput" type="file" accept="image/*" />
+        <div class="hint">拖拽或点击上传，或按 Cmd+V 粘贴图片（支持 GIF，取首帧）</div>
+        <canvas id="previewSmall" width="200" height="120" hidden></canvas>
+        <div class="editor-area">
+          <div class="editor-label">可视裁切预览（拖动缩放）</div>
+          <canvas id="editorCanvas" width="120" height="120"></canvas>
+          <div class="editor-hint">移动端：双指捏合缩放，单指拖动微调</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-row">
+          <label>画布尺寸</label>
+          <div class="inputs">
+            <input id="canvasW" type="number" min="1" value="300"> ×
+            <input id="canvasH" type="number" min="1" value="200">
+          </div>
+        </div>
+
+        <div class="control-row">
+          <label>内图尺寸 (px)</label>
+          <input id="innerSize" type="range" min="10" max="500" value="100">
+          <input id="innerSizeNum" type="number" min="10" max="500" value="100">
+        </div>
+
+        <div class="control-row">
+          <label>填充模式</label>
+          <select id="fillMode">
+            <option value="cover" selected>裁切（Cover）</option>
+            <option value="pad">填充（Pad，保留完整图像并以背景/透明补边）</option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <label>缩放</label>
+          <input id="zoom" type="range" min="50" max="300" value="100">
+          <input id="zoomNum" type="number" min="50" max="300" value="100">%
+          <button id="resetCrop" class="btn">重置裁切</button>
+        </div>
+
+        <div class="control-row">
+          <label>背景</label>
+          <div class="inputs">
+            <label><input id="transparent" type="checkbox" checked> 透明</label>
+            <input id="bgColor" type="color" value="#ffffff" disabled>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <label>输出格式</label>
+          <select id="format">
+            <option value="image/png">PNG (透明)</option>
+            <option value="image/webp">WebP (透明)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel right">
+      <div class="canvas-wrap">
+        <canvas id="mainCanvas" width="300" height="200"></canvas>
+        <div class="overlay">预览</div>
+      </div>
+
+      <div class="meta">
+        <div>支持格式：PNG / JPG / JPEG / WEBP / GIF（取首帧）</div>
+        <div>复制和下载均使用当前配置。</div>
+      </div>
+
+      <div class="actions-right">
+        <div class="action-buttons">
+          <button id="downloadBtn" class="btn primary">下载</button>
+          <button id="copyBtn" class="btn">复制为 PNG</button>
+          <button id="resetBtn" class="btn ghost">重置</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // Inlined script.js
+  (function(){
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea');
+    const mainCanvas = document.getElementById('mainCanvas');
+    const previewCtx = mainCanvas.getContext('2d');
+
+    const canvasW = document.getElementById('canvasW');
+    const canvasH = document.getElementById('canvasH');
+    const innerSize = document.getElementById('innerSize');
+    const innerSizeNum = document.getElementById('innerSizeNum');
+    const transparent = document.getElementById('transparent');
+    const bgColor = document.getElementById('bgColor');
+    const format = document.getElementById('format');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let img = null; let origImg = null;
+    let crop = { centerX:0, centerY:0, baseScale:1, zoom:1 };
+
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('img2banner-theme') || 'dark';
+    function applyTheme(name){ if(name==='light') document.documentElement.setAttribute('data-theme','light'); else document.documentElement.removeAttribute('data-theme'); localStorage.setItem('img2banner-theme', name); if(themeToggle) themeToggle.setAttribute('aria-pressed', name==='light'); }
+    if(themeToggle){ themeToggle.addEventListener('click', e=>{ const next = (localStorage.getItem('img2banner-theme')||'dark')==='light' ? 'dark' : 'light'; themeToggle.animate([{transform:'rotate(0)'},{transform:'rotate(360deg)'}],{duration:360}); applyTheme(next); }); }
+    applyTheme(savedTheme);
+
+    function draw(){ const w = +canvasW.value || 300; const h = +canvasH.value || 200; mainCanvas.width = w; mainCanvas.height = h; previewCtx.clearRect(0,0,w,h); if(!transparent.checked){ previewCtx.fillStyle = bgColor.value; previewCtx.fillRect(0,0,w,h); } if(!img) return; const target = +innerSizeNum.value || +innerSize.value; const sx = img.naturalWidth; const sy = img.naturalHeight; const ratio = Math.min(target / sx, target / sy); const drawW = sx * ratio; const drawH = sy * ratio; const dx = Math.round((w - drawW) / 2); const dy = Math.round((h - drawH) / 2); previewCtx.imageSmoothingEnabled = true; previewCtx.drawImage(img, 0,0,sx,sy, dx,dy, drawW, drawH); }
+
+    function loadFile(file){ if(!file) return; const url = URL.createObjectURL(file); const i = new Image(); i.onload = ()=>{ origImg = i; generateInnerFromOrig(); URL.revokeObjectURL(url); }; i.onerror = ()=>{ URL.revokeObjectURL(url); alert('无法加载图片'); }; i.src = url; }
+
+    function generateInnerFromOrig(){ if(!origImg) return; const target = +innerSizeNum.value || +innerSize.value || 100; const off = document.createElement('canvas'); off.width = target; off.height = target; const ctx = off.getContext('2d'); const sx = origImg.naturalWidth; const sy = origImg.naturalHeight; const mode = (document.getElementById('fillMode') && document.getElementById('fillMode').value) || 'cover'; const baseScaleCover = Math.max(target / sx, target / sy); const baseScalePad = Math.min(target / sx, target / sy); const baseScale = mode === 'pad' ? baseScalePad : baseScaleCover; crop.baseScale = baseScale; if(!crop.centerX && !crop.centerY){ crop.centerX = Math.round(sx/2); crop.centerY = Math.round(sy/2); } const currentScale = baseScale * (crop.zoom || 1); if(mode==='cover'){ const srcW = target / currentScale; const srcH = target / currentScale; let srcX = Math.round(crop.centerX - srcW/2); let srcY = Math.round(crop.centerY - srcH/2); srcX = Math.max(0, Math.min(srcX, sx - srcW)); srcY = Math.max(0, Math.min(srcY, sy - srcH)); ctx.clearRect(0,0,target,target); ctx.imageSmoothingEnabled = true; ctx.drawImage(origImg, srcX, srcY, srcW, srcH, 0,0,target,target); } else { const drawW = Math.round(sx * baseScale * (crop.zoom || 1)); const drawH = Math.round(sy * baseScale * (crop.zoom || 1)); const dx = Math.round((target - drawW)/2); const dy = Math.round((target - drawH)/2); ctx.clearRect(0,0,target,target); ctx.imageSmoothingEnabled = true; ctx.drawImage(origImg, 0,0,sx,sy, dx, dy, drawW, drawH); } const dataUrl = off.toDataURL('image/png'); const inner = new Image(); inner.onload = ()=>{ img = inner; draw(); updateEditor(); }; inner.onerror = ()=>{ img = origImg; draw(); updateEditor(); }; inner.src = dataUrl; }
+
+    fileInput.addEventListener('change', e=>{ const f = e.target.files[0]; if(f) loadFile(f); });
+    ['dragenter','dragover'].forEach(ev=> dropArea.addEventListener(ev, e=>{ e.preventDefault(); dropArea.classList.add('hover'); }));
+    ['dragleave','drop'].forEach(ev=> dropArea.addEventListener(ev, e=>{ e.preventDefault(); dropArea.classList.remove('hover'); }));
+    dropArea.addEventListener('drop', e=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) loadFile(f); });
+    window.addEventListener('paste', async e=>{ const items = e.clipboardData && e.clipboardData.items; if(!items) return; for(const it of items){ if(it.type.startsWith('image/')){ const blob = it.getAsFile(); loadFile(blob); return; } } });
+
+    const editorCanvas = document.getElementById('editorCanvas'); const edCtx = editorCanvas && editorCanvas.getContext('2d'); let isDragging=false; let lastPointer=null; let pinch={active:false,startDist:0,startZoom:1,startMid:null};
+
+    function updateEditor(){ if(!edCtx) return; edCtx.clearRect(0,0,editorCanvas.width, editorCanvas.height); edCtx.fillStyle='rgba(0,0,0,0.06)'; edCtx.fillRect(0,0,editorCanvas.width, editorCanvas.height); if(!origImg) return; const target=+innerSizeNum.value||+innerSize.value||100; const drawSize=Math.min(editorCanvas.width, editorCanvas.height)-8; const padX=(editorCanvas.width-drawSize)/2; const padY=(editorCanvas.height-drawSize)/2; const sx=origImg.naturalWidth; const sy=origImg.naturalHeight; const mode=(document.getElementById('fillMode')&&document.getElementById('fillMode').value)||'cover'; const currentScale=crop.baseScale*(crop.zoom||1); const off=document.createElement('canvas'); off.width=target; off.height=target; const octx=off.getContext('2d'); octx.imageSmoothingEnabled=true; if(mode==='cover'){ const srcW=target/currentScale; const srcH=target/currentScale; let srcX=Math.round(crop.centerX-srcW/2); let srcY=Math.round(crop.centerY-srcH/2); srcX=Math.max(0,Math.min(srcX,sx-srcW)); srcY=Math.max(0,Math.min(srcY,sy-srcH)); octx.drawImage(origImg, srcX, srcY, srcW, srcH, 0,0,target,target); } else { const drawW=Math.round(sx*crop.baseScale*(crop.zoom||1)); const drawH=Math.round(sy*crop.baseScale*(crop.zoom||1)); const dx=Math.round((target-drawW)/2); const dy=Math.round((target-drawH)/2); octx.clearRect(0,0,target,target); octx.drawImage(origImg, 0,0,sx,sy, dx, dy, drawW, drawH); } edCtx.drawImage(off, 0,0,target,target, padX, padY, drawSize, drawSize); edCtx.strokeStyle='rgba(255,255,255,0.95)'; edCtx.lineWidth=2; edCtx.strokeRect(padX, padY, drawSize, drawSize); }
+
+    function getPointerPos(e){ const r=editorCanvas.getBoundingClientRect(); const clientX=(e.clientX!==undefined)?e.clientX:(e.touches&&e.touches[0].clientX); const clientY=(e.clientY!==undefined)?e.clientY:(e.touches&&e.touches[0].clientY); return {x:clientX-r.left,y:clientY-r.top}; }
+    function editorPointerDown(e){ if(!editorCanvas) return; isDragging=true; lastPointer=getPointerPos(e); editorCanvas.setPointerCapture&&editorCanvas.setPointerCapture(e.pointerId); }
+    function editorPointerUp(e){ if(!editorCanvas) return; isDragging=false; lastPointer=null; try{ editorCanvas.releasePointerCapture&&editorCanvas.releasePointerCapture(e.pointerId);}catch(_){} }
+    function editorPointerMove(e){ if(!isDragging||!origImg) return; const p=getPointerPos(e); const dx=p.x-lastPointer.x; const dy=p.y-lastPointer.y; lastPointer=p; const target=+innerSizeNum.value||+innerSize.value||100; const drawSize=Math.min(editorCanvas.width, editorCanvas.height)-8; const srcDeltaX=dx*(target/drawSize)/(crop.baseScale*crop.zoom); const srcDeltaY=dy*(target/drawSize)/(crop.baseScale*crop.zoom); crop.centerX+=srcDeltaX; crop.centerY+=srcDeltaY; const sx=origImg.naturalWidth; const sy=origImg.naturalHeight; const currentScale=crop.baseScale*(crop.zoom||1); const srcW=target/currentScale; const srcH=target/currentScale; crop.centerX=Math.max(srcW/2,Math.min(crop.centerX,sx-srcW/2)); crop.centerY=Math.max(srcH/2,Math.min(crop.centerY,sy-srcH/2)); generateInnerFromOrig(); }
+
+    if(editorCanvas){
+      editorCanvas.addEventListener('pointerdown', editorPointerDown);
+      window.addEventListener('pointerup', editorPointerUp);
+      editorCanvas.addEventListener('pointermove', editorPointerMove);
+
+      editorCanvas.addEventListener('touchstart', e=>{
+        if(e.touches.length===1){
+          editorPointerDown(e.touches[0]);
+        } else if(e.touches.length>=2){
+          pinch.active = true;
+          const t0 = e.touches[0], t1 = e.touches[1];
+          const dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+          pinch.startDist = Math.hypot(dx, dy);
+          pinch.startZoom = crop.zoom || 1;
+          pinch.startMid = { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 };
+          e.preventDefault();
+        }
+      }, {passive:false});
+
+      editorCanvas.addEventListener('touchmove', e=>{
+        if(pinch.active && e.touches.length >= 2){
+          const t0 = e.touches[0], t1 = e.touches[1];
+          const dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+          const dist = Math.hypot(dx, dy);
+          const factor = dist / (pinch.startDist || 1);
+          crop.zoom = Math.max(0.5, Math.min(5, pinch.startZoom * factor));
+          if(zoom) zoom.value = Math.round(crop.zoom * 100);
+          if(zoomNum) zoomNum.value = Math.round(crop.zoom * 100);
+
+          const mid = { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 };
+          const dxMid = mid.x - (pinch.startMid ? pinch.startMid.x : mid.x);
+          const dyMid = mid.y - (pinch.startMid ? pinch.startMid.y : mid.y);
+          pinch.startMid = mid;
+
+          // Convert mid movement to source-pixel pan
+          const target = +innerSizeNum.value || +innerSize.value || 100;
+          const drawSize = Math.min(editorCanvas.width, editorCanvas.height) - 8;
+          const srcDeltaX = dxMid * (target / drawSize) / (crop.baseScale * crop.zoom);
+          const srcDeltaY = dyMid * (target / drawSize) / (crop.baseScale * crop.zoom);
+          crop.centerX += srcDeltaX;
+          crop.centerY += srcDeltaY;
+
+          const sx = origImg.naturalWidth, sy = origImg.naturalHeight;
+          const currentScale = crop.baseScale * (crop.zoom || 1);
+          const srcW = target / currentScale, srcH = target / currentScale;
+          crop.centerX = Math.max(srcW/2, Math.min(crop.centerX, sx - srcW/2));
+          crop.centerY = Math.max(srcH/2, Math.min(crop.centerY, sy - srcH/2));
+
+          generateInnerFromOrig();
+          updateEditor();
+          e.preventDefault();
+        } else if(e.touches.length === 1){
+          // single finger -> pan
+          editorPointerMove(e.touches[0]);
+        }
+      }, {passive:false});
+
+      editorCanvas.addEventListener('touchend', e=>{
+        if(e.touches.length < 2) pinch.active = false;
+        if(e.touches.length === 0) editorPointerUp(e);
+      }, {passive:false});
+    }
+
+    // Prevent clicks on editorCanvas from triggering underlying file input
+    if(editorCanvas){ editorCanvas.addEventListener('click', e=>{ e.stopPropagation(); }); editorCanvas.addEventListener('pointerdown', e=>{ e.stopPropagation(); }); editorCanvas.addEventListener('wheel', e=>{ e.preventDefault(); const delta=-e.deltaY; const factor=1+(delta>0?0.06:-0.06); crop.zoom=Math.max(0.5,Math.min(5,(crop.zoom||1)*factor)); if(zoom) zoom.value=Math.round(crop.zoom*100); if(zoomNum) zoomNum.value=Math.round(crop.zoom*100); generateInnerFromOrig(); updateEditor(); }, {passive:false}); }
+
+    const zoom = document.getElementById('zoom'); const zoomNum = document.getElementById('zoomNum'); if(zoom && zoomNum){ zoom.addEventListener('input', e=>{ zoomNum.value = e.target.value; crop.zoom = e.target.value/100; generateInnerFromOrig(); }); zoomNum.addEventListener('input', e=>{ zoom.value = e.target.value; crop.zoom = e.target.value/100; generateInnerFromOrig(); }); }
+    const resetCropBtn = document.getElementById('resetCrop'); if(resetCropBtn){ resetCropBtn.addEventListener('click', ()=>{ if(!origImg) return; crop.zoom = 1; crop.centerX = Math.round(origImg.naturalWidth/2); crop.centerY = Math.round(origImg.naturalHeight/2); if(zoom) zoom.value = 100; if(zoomNum) zoomNum.value = 100; generateInnerFromOrig(); }); }
+
+    innerSize.addEventListener('input', e=>{ innerSizeNum.value = e.target.value; generateInnerFromOrig(); updateEditor(); }); innerSizeNum.addEventListener('input', e=>{ innerSize.value = e.target.value; generateInnerFromOrig(); updateEditor(); }); const fillModeSelect = document.getElementById('fillMode'); if(fillModeSelect){ fillModeSelect.addEventListener('change', ()=>{ generateInnerFromOrig(); updateEditor(); }); }
+    [canvasW, canvasH, transparent, bgColor].forEach(el=>el.addEventListener('input', draw));
+
+    function updateBgColorState(){ bgColor.disabled = transparent.checked; } transparent.addEventListener('change', ()=>{ updateBgColorState(); draw(); }); updateBgColorState();
+
+    downloadBtn.addEventListener('click', async ()=>{ const mime = format.value || 'image/png'; mainCanvas.toBlob(blob=>{ if(!blob){ alert('导出失败'); return; } const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `image.${mime.includes('webp')? 'webp' : 'png'}`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }, mime, 0.92); });
+
+    copyBtn.addEventListener('click', async ()=>{ try{ mainCanvas.toBlob(async blob =>{ if(!blob) { alert('复制失败'); return; } const item = new ClipboardItem({ 'image/png': blob }); await navigator.clipboard.write([item]); alert('已复制为 PNG 到剪贴板'); }, 'image/png'); }catch(err){ alert('复制失败：浏览器不支持或未授权'); } });
+
+    resetBtn.addEventListener('click', ()=>{ img=null; draw(); });
+    window.addEventListener('load', ()=>{ draw(); });
+  })();
+  </script>
+</body>
+</html>
