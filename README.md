@@ -1,4 +1,4 @@
-# Image Centerer
+# Image to banner
 
 本工具用于把上传或粘贴的（正方形）图片自动放到可配置的画布中心并导出为透明背景的 PNG / WebP。
 
