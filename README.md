@@ -16,3 +16,8 @@
 ## 介绍网站
 
 [https://www.appmiao.com/article/2828](https://www.appmiao.com/article/2828)
+
+
+## 更新说明
+
+单文件版里面修改了下，增加了给中间图添加**线框**的功能
