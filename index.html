@@ -48,7 +48,7 @@ input[type=number], input[type=text], select{width:60px;padding:4px 6px;border-r
 [data-theme="dark"] input[type=number], [data-theme="dark"] input[type=text], [data-theme="dark"] select{background:rgba(0,0,0,0.2);color:#fff;border-color:rgba(255,255,255,0.05);}
 input[type=text] { width: 140px; }
 select { width: auto; max-width: 120px; }
-input[type=range]{width:90px; accent-color: var(--accent);}
+input[type=range]{width:90px; accent-color: var(--accent); cursor:pointer;}
 input[type=color]{width:30px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);padding:0; cursor:pointer;}
 [data-theme="dark"] input[type=color]{border:none;}
 input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; cursor:pointer;}
@@ -61,14 +61,11 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
 [data-theme="dark"] .btn.primary{background:linear-gradient(90deg,#7c5cff,#4dd6ff);color:#041025;}
 .btn.danger{color: #ef4444; background: rgba(239, 68, 68, 0.1); border:none;}
 
-/* === 画布区域样式全面革新 === */
+/* === 画布区域 === */
 .panel.right{display:flex;flex-direction:column;align-items:center;justify-content:center; overflow:hidden;}
-
-/* 外层容器变更为纯色“工作区”底板 */
 .canvas-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:450px;background:#e2e8f0;border-radius:12px; border:1px solid rgba(0,0,0,0.05); overflow:hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);}
 [data-theme="dark"] .canvas-wrap{background:#020617; border:none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);}
 
-/* Canvas 本体加上“透明网格”以及浮出工作区的“外阴影” */
 #mainCanvas{
   background:repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 20px 20px; 
   box-shadow:0 8px 30px rgba(0,0,0,0.15); 
@@ -79,12 +76,12 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
   background:repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 20px 20px; 
   box-shadow:0 12px 40px rgba(0,0,0,0.8);
 }
-/* === 革新结束 === */
 
-
-.editor-area{margin-top:12px;display:flex;flex-direction:column;align-items:center}
-#editorCanvas{background:repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 16px 16px; border-radius:8px; border:1px solid rgba(0,0,0,0.04); position:relative; z-index:3; width:100px; height:100px}
-[data-theme="dark"] #editorCanvas{background:repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 16px 16px;}
+/* === 左侧迷你编辑器 === */
+.editor-area{margin-top:16px;display:flex;flex-direction:column;align-items:center; background:rgba(0,0,0,0.02); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.05);}
+[data-theme="dark"] .editor-area{background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.05);}
+#editorCanvas{background:repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 12px 12px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); position:relative; z-index:3; width:120px; height:120px; cursor:move;}
+[data-theme="dark"] #editorCanvas{background:repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 12px 12px;}
 
 .theme-inline{display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px; width:100%;}
 .theme-inline .theme-btn{padding:8px;border-radius:10px; background:var(--glass); border:1px solid rgba(0,0,0,0.05); cursor:pointer; color:var(--muted);}
@@ -93,7 +90,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
 
 .drag-hint { text-align: center; font-size: 12px; color: var(--accent); margin-top: 8px; font-weight: 500; background: rgba(91,33,182,0.1); padding: 6px; border-radius: 6px; }
 [data-theme="dark"] .drag-hint { color: #7c5cff; background: rgba(124,92,255,0.1); }
-.val-badge { display:inline-block; min-width:48px; text-align:right; font-family:monospace; color:var(--accent); font-weight:bold; }
 .view-controls { position:absolute; bottom:12px; right:12px; display:flex; gap:8px; background:var(--card); padding:6px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:10;}
 .view-controls button { background:transparent; border:none; cursor:pointer; font-size:14px; color:var(--muted); padding:4px 8px; border-radius:4px; font-weight:bold;}
 .view-controls button:hover { background:var(--glass); color:var(--accent);}
@@ -105,36 +101,36 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     <section class="panel left">
       <div class="brand">
         <h1>封面设计大师 Max</h1>
-        <p>支持滚轮缩放、精准数值、全图层发光/边框/拖拽</p>
+        <p>支持多图层精调、拖拽缩放、文字旋转排版</p>
       </div>
 
       <div class="controls-scroll">
         <div class="module-group">
           <div class="module-title">Layer 1: 画布与背景底板</div>
           <div class="control-row">
-            <label>画布尺寸</label>
+            <label>画布宽高</label>
             <div class="inputs">
-              <input id="canvasW" type="number" min="1" value="300"> ×
-              <input id="canvasH" type="number" min="1" value="200">
+              <input id="canvasW" type="number" min="1" value="300" style="width:65px"> ×
+              <input id="canvasH" type="number" min="1" value="200" style="width:65px">
             </div>
           </div>
           <div class="control-row">
             <label>背景填充</label>
             <div class="inputs">
-              <label style="font-size:12px;"><input id="transparent" type="checkbox"> 透明</label>
+              <label style="font-size:12px;"><input id="transparent" type="checkbox" checked> 透明</label>
               <input id="bgColor" type="color" value="#f6f8fb">
             </div>
           </div>
           <div class="uploader bg-uploader" id="bgDropArea">
             <input id="bgFileInput" type="file" accept="image/*" />
-            <div style="font-size:12px; color:var(--muted)">上传图片 (自动覆盖铺满底板)</div>
-            <button id="removeBgImgBtn" class="btn danger" style="display:none; margin-top:6px; font-size:12px; width:100%">移除背景图</button>
+            <div style="font-size:12px; color:var(--muted)">点击或拖入图片 (自动铺满底板)</div>
+            <button id="removeBgImgBtn" class="btn danger" style="display:none; margin-top:6px; font-size:12px; width:100%">移除图片</button>
           </div>
           <div class="control-row">
-            <label>外边距留白</label>
+            <label>底板留白</label>
             <div class="inputs">
-              <input id="bgPadding" type="range" min="0" max="100" value="0" title="为发光留出空间">
-              <span id="bgPaddingVal" class="val-badge">0px</span>
+              <input id="bgPadding" type="range" min="0" max="100" value="0">
+              <input id="bgPaddingNum" type="number" min="0" max="100" value="0" style="width:50px">
             </div>
           </div>
           <div class="control-row">
@@ -143,7 +139,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
               <select id="bgBorderType"><option value="none" selected>无框</option><option value="solid">实线</option><option value="dashed">虚线</option></select>
               <input id="bgBorderWidth" type="number" min="1" max="20" value="2" title="粗细">
               <input id="bgBorderColor" type="color" value="#cbd5e1">
-              <input id="bgRadius" type="range" min="0" max="200" value="0" style="width:50px" title="圆角大小">
+              <input id="bgRadius" type="number" min="0" max="200" value="0" style="width:50px" title="圆角">
             </div>
           </div>
           <div class="control-row">
@@ -151,59 +147,70 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             <div class="inputs">
               <input id="bgShadow" type="checkbox">
               <input id="bgShadowColor" type="color" value="#000000">
-              <input id="bgShadowBlur" type="range" min="0" max="150" value="20" style="width:60px" title="模糊">
+              <input id="bgShadowBlur" type="number" min="0" max="150" value="20" style="width:50px" title="模糊">
             </div>
           </div>
         </div>
 
         <div class="module-group">
-          <div class="module-title">Layer 2: 图标图层</div>
+          <div class="module-title">Layer 2: 图标与插图</div>
           <div class="uploader" id="dropArea">
             <input id="fileInput" type="file" accept="image/*" />
-            <div style="font-size:12px; color:var(--muted)">拖拽/粘贴图标 (可直接在画布拖位)</div>
+            <div style="font-size:12px; color:var(--muted)">拖拽/粘贴图源素材</div>
+            
             <div class="editor-area" id="editorWrap" style="display:none;">
-              <canvas id="editorCanvas" width="100" height="100"></canvas>
+              <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-weight:500;">内部裁切定位区</div>
+              <canvas id="editorCanvas" width="120" height="120"></canvas>
+              <div style="font-size:11px; color:var(--muted); margin-top:8px;">🖱️ 拖拽平移 | ⚙️ 滚轮缩放</div>
+              <button id="resetCropBtn" class="btn" style="padding:4px 8px; font-size:12px; margin-top:8px; width:100%">重置内部图</button>
             </div>
           </div>
-          <div class="control-row">
-            <label>图标大小</label>
+
+          <div class="drag-hint">💡 整体图标可直接在右侧画布拖拽</div>
+          
+          <div class="control-row" style="margin-top:12px;">
+            <label>整体大小</label>
             <div class="inputs">
-              <input id="innerSize" type="range" min="10" max="800" value="100" title="整体尺寸">
-              <span id="innerSizeVal" class="val-badge">100x100</span>
+              <input id="innerSize" type="range" min="10" max="800" value="100">
+              <input id="innerSizeNum" type="number" min="10" max="800" value="100" style="width:55px" title="整体宽高 px">
             </div>
           </div>
-          <div class="control-row" style="display:none;">
-            <input id="zoom" type="range" min="50" max="300" value="100">
+          <div class="control-row">
+            <label>内部缩放</label>
+            <div class="inputs">
+              <input id="zoom" type="range" min="10" max="500" value="100">
+              <input id="zoomNum" type="number" min="10" max="500" value="100" style="width:55px" title="缩放比 %">
+            </div>
           </div>
           <div class="control-row">
-            <label>边框/圆角</label>
+            <label>外框/圆角</label>
             <div class="inputs">
               <select id="borderType"><option value="none" selected>无框</option><option value="solid">实线</option><option value="dashed">虚线</option></select>
               <input id="borderWidth" type="number" min="1" max="20" value="4" title="粗细">
               <input id="borderColor" type="color" value="#ffffff">
-              <input id="borderRadius" type="range" min="0" max="400" value="24" style="width:50px" title="圆角大小">
+              <input id="borderRadius" type="number" min="0" max="400" value="24" style="width:50px" title="圆角">
             </div>
           </div>
           <div class="control-row">
-            <label>发光/阴影</label>
+            <label>发光阴影</label>
             <div class="inputs">
               <input id="enableShadow" type="checkbox" checked>
               <input id="shadowColor" type="color" value="#5b21b6">
-              <input id="shadowBlur" type="range" min="0" max="150" value="20" style="width:60px" title="模糊">
+              <input id="shadowBlur" type="number" min="0" max="150" value="20" style="width:50px" title="模糊度">
             </div>
           </div>
         </div>
 
         <div class="module-group">
-          <div class="module-title">Layer 3: 文本图层</div>
+          <div class="module-title">Layer 3: 悬浮文本</div>
           <div class="control-row">
-            <label>内容</label>
+            <label>文字内容</label>
             <div class="inputs">
               <input id="textContent" type="text" placeholder="留空不显示 (可拖拽)">
             </div>
           </div>
           <div class="control-row">
-            <label>字体设置</label>
+            <label>字体族</label>
             <div class="inputs">
               <select id="textFont">
                 <option value="system-ui, sans-serif">系统默认</option>
@@ -215,22 +222,34 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             </div>
           </div>
           <div class="control-row">
-            <label>文字样式</label>
+            <label>文字大小</label>
             <div class="inputs">
               <input id="textColor" type="color" value="#0b1220">
-              <input id="textSize" type="number" min="10" max="200" value="24" title="字号">
-              <label style="font-size:12px; margin-left:4px;"><input id="enableTextShadow" type="checkbox"> 字阴影</label>
-              <input id="textShadowColor" type="color" value="#ffffff">
+              <input id="textSize" type="range" min="10" max="200" value="24" style="width:70px;">
+              <input id="textSizeNum" type="number" min="10" max="200" value="24" style="width:50px" title="字号">
+            </div>
+          </div>
+          <div class="control-row">
+            <label>字体角度</label>
+            <div class="inputs">
+              <input id="textAngle" type="range" min="-180" max="180" value="0" style="width:110px;">
+              <input id="textAngleNum" type="number" min="-180" max="180" value="0" style="width:50px" title="旋转角度">
             </div>
           </div>
           
+          <div class="control-row" style="justify-content:flex-end;">
+             <label style="font-size:12px;"><input id="enableTextShadow" type="checkbox"> 开启文字阴影</label>
+             <input id="textShadowColor" type="color" value="#ffffff" style="margin-left:8px;">
+          </div>
+          
           <div style="border-top:1px dashed rgba(0,0,0,0.1); margin-top:8px; padding-top:8px;"></div>
+          
           <div class="control-row">
-            <label>底板填充</label>
+            <label>底色填充</label>
             <div class="inputs">
               <label style="font-size:12px;"><input id="enableTextBg" type="checkbox"> 开启</label>
               <input id="textBgColor" type="color" value="#ffffff">
-              <input id="textBgAlpha" type="range" min="0" max="100" value="80" style="width:50px" title="透明度">
+              <input id="textBgAlpha" type="number" min="0" max="100" value="80" style="width:50px" title="透明度 %">
             </div>
           </div>
           <div class="control-row">
@@ -239,7 +258,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
               <select id="textBorderType"><option value="none" selected>无框</option><option value="solid">实线</option><option value="dashed">虚线</option></select>
               <input id="textBorderWidth" type="number" min="1" max="20" value="2" title="粗细">
               <input id="textBorderColor" type="color" value="#cbd5e1">
-              <input id="textRadius" type="range" min="0" max="100" value="8" style="width:50px" title="圆角大小">
+              <input id="textRadius" type="number" min="0" max="100" value="8" style="width:50px" title="圆角">
             </div>
           </div>
           <div class="control-row">
@@ -247,12 +266,11 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             <div class="inputs">
               <input id="textShadow" type="checkbox">
               <input id="textShadowBoxColor" type="color" value="#000000">
-              <input id="textShadowBlur" type="range" min="0" max="150" value="15" style="width:60px" title="模糊">
+              <input id="textShadowBlur" type="number" min="0" max="150" value="15" style="width:50px" title="模糊">
             </div>
           </div>
 
         </div>
-
       </div>
     </section>
 
@@ -268,11 +286,10 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
       <div class="canvas-wrap" id="canvasWrap">
         <canvas id="mainCanvas" width="300" height="200"></canvas>
         <div class="view-controls">
-            <span style="font-size:12px; color:var(--muted); line-height:24px;">🖱️滚轮缩放视图</span>
             <button id="zoomOut">-</button>
             <span id="zoomDisplay" style="font-size:12px; color:var(--accent); line-height:24px; min-width:40px; text-align:center;">100%</span>
             <button id="zoomIn">+</button>
-            <button id="zoomReset">还原</button>
+            <button id="zoomReset" title="重置视图比例">还原</button>
         </div>
       </div>
 
@@ -283,7 +300,9 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
               <option value="image/png">PNG</option>
               <option value="image/jpeg">JPEG</option>
             </select>
-            <label style="color:var(--muted); font-size:12px;">质量 <input id="quality" type="range" min="10" max="100" value="90" style="width:60px; vertical-align:middle;"></label>
+            <label style="color:var(--muted); font-size:12px; display:flex; align-items:center; gap:4px;">
+                质量 <input id="qualityNum" type="number" min="10" max="100" value="90" style="width:50px;">
+            </label>
         </div>
         <div class="action-buttons">
           <button id="copyBtn" class="btn">复制图</button>
@@ -295,7 +314,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
 
   <script>
   (function(){
-    // === 核心元素获取 ===
     const mainCanvas = document.getElementById('mainCanvas');
     const ctx = mainCanvas.getContext('2d');
     
@@ -306,8 +324,10 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     const bgColor = document.getElementById('bgColor');
     const bgFileInput = document.getElementById('bgFileInput');
     const removeBgImgBtn = document.getElementById('removeBgImgBtn');
+    
     const bgPadding = document.getElementById('bgPadding');
-    const bgPaddingVal = document.getElementById('bgPaddingVal');
+    const bgPaddingNum = document.getElementById('bgPaddingNum');
+    
     const bgBorderType = document.getElementById('bgBorderType');
     const bgBorderWidth = document.getElementById('bgBorderWidth');
     const bgBorderColor = document.getElementById('bgBorderColor');
@@ -319,8 +339,9 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     // Layer 2
     const fileInput = document.getElementById('fileInput');
     const innerSize = document.getElementById('innerSize');
-    const innerSizeVal = document.getElementById('innerSizeVal');
+    const innerSizeNum = document.getElementById('innerSizeNum');
     const zoom = document.getElementById('zoom');
+    const zoomNum = document.getElementById('zoomNum');
     const borderType = document.getElementById('borderType');
     const borderWidth = document.getElementById('borderWidth');
     const borderColor = document.getElementById('borderColor');
@@ -328,6 +349,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     const enableShadow = document.getElementById('enableShadow');
     const shadowColor = document.getElementById('shadowColor');
     const shadowBlur = document.getElementById('shadowBlur');
+    const resetCropBtn = document.getElementById('resetCropBtn');
 
     // Layer 3
     const textContent = document.getElementById('textContent');
@@ -335,13 +357,16 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     const loadLocalFontBtn = document.getElementById('loadLocalFontBtn');
     const textColor = document.getElementById('textColor');
     const textSize = document.getElementById('textSize');
+    const textSizeNum = document.getElementById('textSizeNum');
+    const textAngle = document.getElementById('textAngle');
+    const textAngleNum = document.getElementById('textAngleNum');
+    
     const enableTextBg = document.getElementById('enableTextBg');
     const textBgColor = document.getElementById('textBgColor');
     const textBgAlpha = document.getElementById('textBgAlpha');
     const enableTextShadow = document.getElementById('enableTextShadow');
     const textShadowColor = document.getElementById('textShadowColor');
     
-    // 文字块新属性
     const textBorderType = document.getElementById('textBorderType');
     const textBorderWidth = document.getElementById('textBorderWidth');
     const textBorderColor = document.getElementById('textBorderColor');
@@ -351,7 +376,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     const textShadowBlur = document.getElementById('textShadowBlur');
 
     const format = document.getElementById('format');
-    const quality = document.getElementById('quality');
+    const qualityNum = document.getElementById('qualityNum');
     const editorCanvas = document.getElementById('editorCanvas');
     const editorWrap = document.getElementById('editorWrap');
 
@@ -383,7 +408,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
       });
     }
 
-    // === 画布滚轮缩放逻辑 ===
+    // === 视图缩放 ===
     let viewScale = 1.0;
     const canvasWrap = document.getElementById('canvasWrap');
     const zoomDisplay = document.getElementById('zoomDisplay');
@@ -393,25 +418,36 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         mainCanvas.style.transform = `scale(${viewScale})`;
         zoomDisplay.textContent = Math.round(viewScale * 100) + '%';
     }
-    
     canvasWrap.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        updateViewScale(viewScale + delta);
+        e.preventDefault(); updateViewScale(viewScale + (e.deltaY > 0 ? -0.1 : 0.1));
     }, {passive: false});
 
     document.getElementById('zoomIn').addEventListener('click', () => updateViewScale(viewScale + 0.1));
     document.getElementById('zoomOut').addEventListener('click', () => updateViewScale(viewScale - 0.1));
     document.getElementById('zoomReset').addEventListener('click', () => updateViewScale(1));
 
-    // === 状态与坐标系 ===
+    // === 双向绑定 ===
+    function syncInput(rangeEl, numEl, callback) {
+        rangeEl.addEventListener('input', e => { numEl.value = e.target.value; if(callback) callback(); });
+        numEl.addEventListener('input', e => { rangeEl.value = e.target.value; if(callback) callback(); });
+    }
+    syncInput(bgPadding, bgPaddingNum, draw);
+    syncInput(innerSize, innerSizeNum, () => { generateInnerFromOrig(); });
+    syncInput(zoom, zoomNum, () => { crop.zoom = zoom.value/100; generateInnerFromOrig(); });
+    syncInput(textSize, textSizeNum, draw);
+    syncInput(textAngle, textAngleNum, draw);
+
+    // 背景色禁用联动
+    function updateBgColorState(){ bgColor.disabled = transparent.checked; } 
+    transparent.addEventListener('change', ()=>{ updateBgColorState(); draw(); }); 
+    updateBgColorState();
+
+    // === 状态系 ===
     let mainImg = null; let origImg = null; let bgImg = null; 
     let crop = { centerX:0, centerY:0, baseScale:1, zoom:1 };
-
     let iconPos = { x: 150, y: 100 };
     let textPos = { x: 150, y: 160 };
-    let dragTarget = null; 
-    let dragOffset = { x: 0, y: 0 };
+    let dragTarget = null; let dragOffset = { x: 0, y: 0 };
 
     function centerElements() {
         const w = +canvasW.value; const h = +canvasH.value;
@@ -419,10 +455,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         textPos = { x: w / 2, y: h * 0.8 }; 
     }
     [canvasW, canvasH].forEach(el => el.addEventListener('change', () => { centerElements(); draw(); }));
-
-    // 数值显示联动
-    innerSize.addEventListener('input', e => { innerSizeVal.textContent = `${e.target.value}x${e.target.value}`; });
-    bgPadding.addEventListener('input', e => { bgPaddingVal.textContent = `${e.target.value}px`; });
 
     function drawRoundRect(ctx, x, y, w, h, r) {
         if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
@@ -439,23 +471,19 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    // === 画布拖拽事件 ===
+    // === 主画布拖拽核心算法 (支持矩阵旋转) ===
     function getPointerPos(e) {
         const rect = mainCanvas.getBoundingClientRect();
-        // 核心：抵消 CSS transform: scale 的影响
         const scaleX = mainCanvas.width / rect.width;
         const scaleY = mainCanvas.height / rect.height;
-        return {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY
-        };
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
     }
 
     mainCanvas.addEventListener('pointerdown', (e) => {
         const pos = getPointerPos(e);
         dragTarget = null;
 
-        // 1. 文字检测
+        // 1. 文字碰撞检测 (引入逆向旋转矩阵算法)
         const txt = textContent.value;
         if(txt.trim() !== '') {
             const fSize = +textSize.value;
@@ -468,16 +496,26 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             const halfW = tWidth / 2 + padX;
             const halfH = fSize / 2 + padY;
 
-            if(pos.x >= textPos.x - halfW && pos.x <= textPos.x + halfW &&
-               pos.y >= textPos.y - halfH && pos.y <= textPos.y + halfH) {
+            // 抵消旋转角度的影响
+            const dx = pos.x - textPos.x;
+            const dy = pos.y - textPos.y;
+            const angle = +textAngle.value * Math.PI / 180;
+            const cosA = Math.cos(-angle);
+            const sinA = Math.sin(-angle);
+            // 得到旋转前本地坐标系的点击位置
+            const localX = dx * cosA - dy * sinA;
+            const localY = dx * sinA + dy * cosA;
+
+            if(localX >= -halfW && localX <= halfW && localY >= -halfH && localY <= halfH) {
                 dragTarget = 'text';
+                // 记录相对整体中心点的世界坐标差值，拖动时保持相对位置
                 dragOffset = { x: pos.x - textPos.x, y: pos.y - textPos.y };
                 mainCanvas.setPointerCapture(e.pointerId);
                 return;
             }
         }
 
-        // 2. 图标检测
+        // 2. 图标碰撞检测
         if (mainImg) {
             const target = +innerSize.value; 
             const sx = mainImg.naturalWidth, sy = mainImg.naturalHeight; 
@@ -497,23 +535,52 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     mainCanvas.addEventListener('pointermove', (e) => {
         if (!dragTarget) return;
         const pos = getPointerPos(e);
-        
         if (dragTarget === 'icon') {
-            iconPos.x = pos.x - dragOffset.x;
-            iconPos.y = pos.y - dragOffset.y;
+            iconPos.x = pos.x - dragOffset.x; iconPos.y = pos.y - dragOffset.y;
         } else if (dragTarget === 'text') {
-            textPos.x = pos.x - dragOffset.x;
-            textPos.y = pos.y - dragOffset.y;
+            textPos.x = pos.x - dragOffset.x; textPos.y = pos.y - dragOffset.y;
         }
         draw();
     });
 
     mainCanvas.addEventListener('pointerup', (e) => {
-        if (dragTarget) {
-            mainCanvas.releasePointerCapture(e.pointerId);
-            dragTarget = null;
-        }
+        if (dragTarget) { mainCanvas.releasePointerCapture(e.pointerId); dragTarget = null; }
     });
+
+    // === 左侧小画布拖拽 ===
+    let isEdDragging = false, lastEdP = null;
+    function updateEditorPreview(){
+        if(!origImg) return; const eCtx = editorCanvas.getContext('2d');
+        eCtx.clearRect(0,0,120,120); eCtx.drawImage(mainImg, 0,0,120,120);
+    }
+    editorCanvas.addEventListener('pointerdown', e => { 
+        isEdDragging = true; lastEdP = {x: e.clientX, y: e.clientY}; 
+        editorCanvas.setPointerCapture(e.pointerId); 
+    });
+    window.addEventListener('pointerup', () => { isEdDragging = false; lastEdP = null; });
+    editorCanvas.addEventListener('pointermove', e => {
+        if(!isEdDragging || !origImg) return;
+        const dx = e.clientX - lastEdP.x, dy = e.clientY - lastEdP.y; 
+        lastEdP = {x: e.clientX, y: e.clientY};
+        const target = +innerSize.value;
+        crop.centerX -= dx * (target/120) / (crop.baseScale * crop.zoom);
+        crop.centerY -= dy * (target/120) / (crop.baseScale * crop.zoom);
+        generateInnerFromOrig();
+    });
+    editorCanvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const factor = 1 + (-e.deltaY > 0 ? 0.05 : -0.05); 
+        crop.zoom = Math.max(0.2, Math.min(5, crop.zoom * factor));
+        zoom.value = Math.round(crop.zoom * 100); zoomNum.value = zoom.value;
+        generateInnerFromOrig();
+    }, {passive: false});
+
+    resetCropBtn.addEventListener('click', () => {
+        if(!origImg) return;
+        crop.zoom = 1; crop.centerX = origImg.naturalWidth / 2; crop.centerY = origImg.naturalHeight / 2;
+        zoom.value = 100; zoomNum.value = 100; generateInnerFromOrig();
+    });
+
 
     // === 核心渲染引擎 ===
     function draw() { 
@@ -521,16 +588,12 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         const h = +canvasH.value || 200; 
         mainCanvas.width = w; mainCanvas.height = h; 
         ctx.clearRect(0,0,w,h); 
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
         
         // --- Layer 1: 背景 ---
         const pad = +bgPadding.value;
-        const bgW = w - pad * 2;
-        const bgH = h - pad * 2;
-        const bgX = pad;
-        const bgY = pad;
-        const bRad1 = +bgRadius.value;
+        const bgW = Math.max(1, w - pad * 2); const bgH = Math.max(1, h - pad * 2);
+        const bgX = pad; const bgY = pad; const bRad1 = +bgRadius.value;
 
         ctx.save();
         if (bgShadow.checked) {
@@ -539,19 +602,15 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             ctx.shadowOffsetY = +bgShadowBlur.value / 3;
         }
         
-        // 底板填充
         drawRoundRect(ctx, bgX, bgY, bgW, bgH, bRad1);
         if(!transparent.checked || format.value === 'image/jpeg'){ 
-            ctx.fillStyle = bgColor.value; 
-            ctx.fill(); 
+            ctx.fillStyle = bgColor.value; ctx.fill(); 
         }
-        ctx.restore(); // 去除阴影，不影响后续
+        ctx.restore(); 
 
-        // 图片覆盖底板
         if(bgImg) {
             ctx.save();
-            drawRoundRect(ctx, bgX, bgY, bgW, bgH, bRad1);
-            ctx.clip();
+            drawRoundRect(ctx, bgX, bgY, bgW, bgH, bRad1); ctx.clip();
             const sx = bgImg.naturalWidth, sy = bgImg.naturalHeight;
             const scale = Math.max(bgW / sx, bgH / sy);
             const drawW = sx * scale, drawH = sy * scale;
@@ -560,15 +619,12 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             ctx.restore();
         }
 
-        // 底板边框
         if (bgBorderType.value !== 'none') {
             ctx.save();
             drawRoundRect(ctx, bgX, bgY, bgW, bgH, bRad1);
-            ctx.lineWidth = +bgBorderWidth.value;
-            ctx.strokeStyle = bgBorderColor.value;
+            ctx.lineWidth = +bgBorderWidth.value; ctx.strokeStyle = bgBorderColor.value;
             if (bgBorderType.value === 'dashed') ctx.setLineDash([+bgBorderWidth.value*2, +bgBorderWidth.value*1.5]);
-            ctx.stroke();
-            ctx.restore();
+            ctx.stroke(); ctx.restore();
         }
 
         // --- Layer 2: 主图 ---
@@ -577,101 +633,89 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             const sx = mainImg.naturalWidth, sy = mainImg.naturalHeight; 
             const ratio = Math.min(target / sx, target / sy); 
             const drawW = sx * ratio, drawH = sy * ratio; 
-            const dx = iconPos.x - drawW / 2;
-            const dy = iconPos.y - drawH / 2;
-            
-            const bRadius = +(borderRadius.value || 0);
-            const bWidth = +(borderWidth.value || 0);
+            const dx = iconPos.x - drawW / 2; const dy = iconPos.y - drawH / 2;
+            const bRadius = +(borderRadius.value || 0); const bWidth = +(borderWidth.value || 0);
 
-            const offC = document.createElement('canvas');
-            offC.width = drawW; offC.height = drawH;
-            const oCtx = offC.getContext('2d');
-            oCtx.imageSmoothingEnabled = true;
+            const offC = document.createElement('canvas'); offC.width = drawW; offC.height = drawH;
+            const oCtx = offC.getContext('2d'); oCtx.imageSmoothingEnabled = true;
             if (bRadius > 0) { drawRoundRect(oCtx, 0, 0, drawW, drawH, bRadius); oCtx.clip(); }
             oCtx.drawImage(mainImg, 0,0,sx,sy, 0,0, drawW, drawH);
 
             ctx.save();
             if (enableShadow.checked) {
                 ctx.shadowColor = hexToRgba(shadowColor.value, 0.5);
-                ctx.shadowBlur = +shadowBlur.value;
-                ctx.shadowOffsetY = +shadowBlur.value / 3;
+                ctx.shadowBlur = +shadowBlur.value; ctx.shadowOffsetY = +shadowBlur.value / 3;
             }
-            ctx.drawImage(offC, dx, dy);
-            ctx.restore();
+            ctx.drawImage(offC, dx, dy); ctx.restore();
 
             if (borderType.value !== 'none') {
                 ctx.save();
                 drawRoundRect(ctx, dx, dy, drawW, drawH, bRadius);
-                ctx.lineWidth = bWidth;
-                ctx.strokeStyle = borderColor.value;
+                ctx.lineWidth = bWidth; ctx.strokeStyle = borderColor.value;
                 if (borderType.value === 'dashed') ctx.setLineDash([bWidth*2, bWidth*1.5]);
-                ctx.stroke();
-                ctx.restore();
+                ctx.stroke(); ctx.restore();
             }
         }
 
-        // --- Layer 3: 文字 ---
+        // --- Layer 3: 文字 (支持旋转) ---
         const txt = textContent.value;
         if(txt.trim() !== '') {
             ctx.save();
             const fSize = +textSize.value;
             ctx.font = `bold ${fSize}px ${textFont.value}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
-            const tx = textPos.x;
-            const ty = textPos.y;
+            const tx = textPos.x; const ty = textPos.y;
+            const angle = +textAngle.value * Math.PI / 180;
+
+            // 移动原点并旋转
+            ctx.translate(tx, ty);
+            ctx.rotate(angle);
             
             if(enableTextBg.checked) {
                 const metrics = ctx.measureText(txt);
                 const tWidth = metrics.width;
-                const paddingX = fSize * 0.6;
-                const paddingY = fSize * 0.4;
-                const boxW = tWidth + paddingX * 2;
-                const boxH = fSize + paddingY * 2;
-                const boxX = tx - tWidth/2 - paddingX;
-                const boxY = ty - fSize/2 - paddingY;
+                const paddingX = fSize * 0.6; const paddingY = fSize * 0.4;
+                const boxW = tWidth + paddingX * 2; const boxH = fSize + paddingY * 2;
+                // 由于已经平移到了中心，所以盒子的坐标变成负数一半
+                const boxX = 0 - tWidth/2 - paddingX;
+                const boxY = 0 - fSize/2 - paddingY;
                 const boxRad = +textRadius.value;
 
                 ctx.save();
                 if (textShadow.checked) {
                     ctx.shadowColor = hexToRgba(textShadowBoxColor.value, 0.5);
-                    ctx.shadowBlur = +textShadowBlur.value;
-                    ctx.shadowOffsetY = +textShadowBlur.value / 3;
+                    ctx.shadowBlur = +textShadowBlur.value; ctx.shadowOffsetY = +textShadowBlur.value / 3;
                 }
                 ctx.fillStyle = hexToRgba(textBgColor.value, +textBgAlpha.value / 100);
                 drawRoundRect(ctx, boxX, boxY, boxW, boxH, boxRad);
-                ctx.fill();
-                ctx.restore();
+                ctx.fill(); ctx.restore();
 
                 if (textBorderType.value !== 'none') {
                     ctx.save();
                     drawRoundRect(ctx, boxX, boxY, boxW, boxH, boxRad);
-                    ctx.lineWidth = +textBorderWidth.value;
-                    ctx.strokeStyle = textBorderColor.value;
+                    ctx.lineWidth = +textBorderWidth.value; ctx.strokeStyle = textBorderColor.value;
                     if(textBorderType.value === 'dashed') ctx.setLineDash([+textBorderWidth.value*2, +textBorderWidth.value*1.5]);
-                    ctx.stroke();
-                    ctx.restore();
+                    ctx.stroke(); ctx.restore();
                 }
             }
 
             if(enableTextShadow.checked) {
                 ctx.shadowColor = textShadowColor.value;
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetY = 2;
+                ctx.shadowBlur = 10; ctx.shadowOffsetY = 2;
             }
 
             ctx.fillStyle = textColor.value;
-            ctx.fillText(txt, tx, ty);
+            // 因为 translate 了，所以文字绘制在 0,0
+            ctx.fillText(txt, 0, 0);
             ctx.restore();
         }
     }
 
-    // === 事件监听汇集 ===
     const drawTriggers = [
-        canvasW, canvasH, transparent, bgColor, bgPadding, bgBorderType, bgBorderWidth, bgBorderColor, bgRadius, bgShadow, bgShadowColor, bgShadowBlur,
-        innerSize, zoom, borderType, borderWidth, borderColor, borderRadius, enableShadow, shadowColor, shadowBlur, 
-        textContent, textFont, textColor, textSize, enableTextBg, textBgColor, textBgAlpha, enableTextShadow, textShadowColor,
+        canvasW, canvasH, transparent, bgColor, bgBorderType, bgBorderWidth, bgBorderColor, bgRadius, bgShadow, bgShadowColor, bgShadowBlur,
+        borderType, borderWidth, borderColor, borderRadius, enableShadow, shadowColor, shadowBlur, 
+        textContent, textFont, textColor, enableTextBg, textBgColor, textBgAlpha, enableTextShadow, textShadowColor,
         textBorderType, textBorderWidth, textBorderColor, textRadius, textShadow, textShadowBoxColor, textShadowBlur, format
     ];
     drawTriggers.forEach(el => el.addEventListener('input', draw));
@@ -692,11 +736,14 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         const baseScale = Math.max(target / sx, target / sy); 
         crop.baseScale = baseScale; 
         if(!crop.centerX) { crop.centerX = sx/2; crop.centerY = sy/2; } 
+        
         const curScale = baseScale * (crop.zoom || 1); 
         const srcW = target / curScale, srcH = target / curScale; 
         let srcX = crop.centerX - srcW/2, srcY = crop.centerY - srcH/2; 
         srcX = Math.max(0, Math.min(srcX, sx - srcW)); srcY = Math.max(0, Math.min(srcY, sy - srcH)); 
-        octx.imageSmoothingEnabled = true; 
+        crop.centerX = srcX + srcW/2; crop.centerY = srcY + srcH/2;
+
+        octx.imageSmoothingEnabled = true; octx.imageSmoothingQuality = 'high';
         octx.drawImage(origImg, srcX, srcY, srcW, srcH, 0,0,target,target); 
         const inner = new Image(); inner.onload = ()=>{ mainImg = inner; draw(); updateEditorPreview(); }; inner.src = off.toDataURL('image/png'); 
     }
@@ -711,23 +758,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             const u=URL.createObjectURL(it.getAsFile()); const i=new Image(); 
             i.onload=()=>{origImg=i; editorWrap.style.display='block'; crop={zoom:zoom.value/100}; centerElements(); generateInnerFromOrig(); URL.revokeObjectURL(u);}; i.src=u; return; 
         }} 
-    });
-    zoom.addEventListener('input', e=>{ crop.zoom = e.target.value/100; generateInnerFromOrig(); });
-    innerSize.addEventListener('change', () => { generateInnerFromOrig(); });
-
-    let isEdDragging=false, lastEdP=null;
-    function updateEditorPreview(){
-        if(!origImg) return; const eCtx = editorCanvas.getContext('2d');
-        eCtx.clearRect(0,0,100,100); eCtx.drawImage(mainImg, 0,0,100,100);
-    }
-    editorCanvas.addEventListener('pointerdown', e=>{ isEdDragging=true; lastEdP={x:e.clientX, y:e.clientY}; editorCanvas.setPointerCapture(e.pointerId); });
-    window.addEventListener('pointerup', ()=>{ isEdDragging=false; lastEdP=null; });
-    editorCanvas.addEventListener('pointermove', e=>{
-        if(!isEdDragging || !origImg) return;
-        const dx = e.clientX - lastEdP.x, dy = e.clientY - lastEdP.y; lastEdP = {x:e.clientX, y:e.clientY};
-        crop.centerX -= dx * (+innerSize.value/100) / (crop.baseScale * crop.zoom);
-        crop.centerY -= dy * (+innerSize.value/100) / (crop.baseScale * crop.zoom);
-        generateInnerFromOrig();
     });
 
     loadLocalFontBtn.addEventListener('click', async () => {
@@ -744,7 +774,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     });
 
     downloadBtn.addEventListener('click', ()=>{ 
-        const mime = format.value; const q = +(quality.value) / 100;
+        const mime = format.value; const q = +(qualityNum.value) / 100;
         mainCanvas.toBlob(blob=>{ 
             if(!blob) return; const u = URL.createObjectURL(blob); const a = document.createElement('a'); 
             a.href = u; a.download = `cover_${Date.now()}.${mime.split('/')[1]}`; 
@@ -756,7 +786,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         try{ mainCanvas.toBlob(async blob =>{ if(!blob) return; await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('已复制到剪贴板！'); }, 'image/png'); }catch(e){ alert('复制失败'); } 
     });
 
-    // 初始化
     centerElements();
     draw();
   })();
