@@ -18,8 +18,11 @@ body{font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; margin:
 [data-theme="dark"] .panel{box-shadow:0 6px 30px rgba(2,6,23,0.6); border:none;}
 .panel.left{max-width:440px; display:flex; flex-direction:column; max-height:calc(100vh - 40px);}
 
-.brand h1{margin:0;font-size:20px;letter-spacing:0.4px}
-.brand p{margin:6px 0 18px;color:var(--muted);font-size:13px}
+.brand h1{margin:0;font-size:20px;letter-spacing:0.4px; display:flex; align-items:center; justify-content:space-between;}
+.brand p{margin:6px 0 16px;color:var(--muted);font-size:13px}
+
+.preset-bar { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--glass); border-radius:10px; margin-bottom:16px; border:1px solid rgba(0,0,0,0.05); }
+[data-theme="dark"] .preset-bar { border:1px solid rgba(255,255,255,0.05); }
 
 .controls-scroll{flex:1; overflow-y:auto; padding-right:12px; margin-right:-4px;}
 .controls-scroll::-webkit-scrollbar { width: 6px; }
@@ -61,7 +64,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
 [data-theme="dark"] .btn.primary{background:linear-gradient(90deg,#7c5cff,#4dd6ff);color:#041025;}
 .btn.danger{color: #ef4444; background: rgba(239, 68, 68, 0.1); border:none;}
 
-/* === 画布区域 === */
+/* 画布区域 */
 .panel.right{display:flex;flex-direction:column;align-items:center;justify-content:center; overflow:hidden;}
 .canvas-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:450px;background:#e2e8f0;border-radius:12px; border:1px solid rgba(0,0,0,0.05); overflow:hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);}
 [data-theme="dark"] .canvas-wrap{background:#020617; border:none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);}
@@ -77,7 +80,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
   box-shadow:0 12px 40px rgba(0,0,0,0.8);
 }
 
-/* === 左侧迷你编辑器 === */
 .editor-area{margin-top:16px;display:flex;flex-direction:column;align-items:center; background:rgba(0,0,0,0.02); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.05);}
 [data-theme="dark"] .editor-area{background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.05);}
 #editorCanvas{background:repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 12px 12px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); position:relative; z-index:3; width:120px; height:120px; cursor:move;}
@@ -101,7 +103,16 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     <section class="panel left">
       <div class="brand">
         <h1>封面设计大师 Max</h1>
-        <p>支持多图层精调、拖拽缩放、文字旋转排版</p>
+        <p>文章封面生成器 · 支持多图层与预设保存</p>
+      </div>
+
+      <div class="preset-bar">
+        <span style="font-size:13px; font-weight:700; color:var(--muted);">📁 工程预设</span>
+        <div style="display:flex; gap:8px;">
+          <button id="importBtn" class="btn" style="padding:6px 10px; font-size:12px;">📂 导入预设</button>
+          <button id="exportPresetBtn" class="btn primary" style="padding:6px 10px; font-size:12px;">💾 保存预设</button>
+        </div>
+        <input type="file" id="importInput" accept=".json" style="display:none">
       </div>
 
       <div class="controls-scroll">
@@ -314,71 +325,55 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
 
   <script>
   (function(){
+    // === 需要保存状态的完整 ID 列表 ===
+    const stateIds = [
+      'canvasW', 'canvasH', 'transparent', 'bgColor', 'bgPadding', 'bgBorderType', 'bgBorderWidth', 'bgBorderColor', 'bgRadius', 'bgShadow', 'bgShadowColor', 'bgShadowBlur',
+      'innerSize', 'zoom', 'borderType', 'borderWidth', 'borderColor', 'borderRadius', 'enableShadow', 'shadowColor', 'shadowBlur',
+      'textContent', 'textFont', 'textColor', 'textSize', 'textAngle', 'enableTextBg', 'textBgColor', 'textBgAlpha', 'enableTextShadow', 'textShadowColor',
+      'textBorderType', 'textBorderWidth', 'textBorderColor', 'textRadius', 'textShadow', 'textShadowBoxColor', 'textShadowBlur',
+      'format', 'qualityNum'
+    ];
+
     const mainCanvas = document.getElementById('mainCanvas');
     const ctx = mainCanvas.getContext('2d');
     
     // Layer 1
-    const canvasW = document.getElementById('canvasW');
-    const canvasH = document.getElementById('canvasH');
-    const transparent = document.getElementById('transparent');
-    const bgColor = document.getElementById('bgColor');
-    const bgFileInput = document.getElementById('bgFileInput');
-    const removeBgImgBtn = document.getElementById('removeBgImgBtn');
-    
-    const bgPadding = document.getElementById('bgPadding');
-    const bgPaddingNum = document.getElementById('bgPaddingNum');
-    
-    const bgBorderType = document.getElementById('bgBorderType');
-    const bgBorderWidth = document.getElementById('bgBorderWidth');
-    const bgBorderColor = document.getElementById('bgBorderColor');
-    const bgRadius = document.getElementById('bgRadius');
-    const bgShadow = document.getElementById('bgShadow');
-    const bgShadowColor = document.getElementById('bgShadowColor');
-    const bgShadowBlur = document.getElementById('bgShadowBlur');
+    const canvasW = document.getElementById('canvasW'); const canvasH = document.getElementById('canvasH');
+    const transparent = document.getElementById('transparent'); const bgColor = document.getElementById('bgColor');
+    const bgFileInput = document.getElementById('bgFileInput'); const removeBgImgBtn = document.getElementById('removeBgImgBtn');
+    const bgPadding = document.getElementById('bgPadding'); const bgPaddingNum = document.getElementById('bgPaddingNum');
+    const bgBorderType = document.getElementById('bgBorderType'); const bgBorderWidth = document.getElementById('bgBorderWidth');
+    const bgBorderColor = document.getElementById('bgBorderColor'); const bgRadius = document.getElementById('bgRadius');
+    const bgShadow = document.getElementById('bgShadow'); const bgShadowColor = document.getElementById('bgShadowColor'); const bgShadowBlur = document.getElementById('bgShadowBlur');
 
     // Layer 2
     const fileInput = document.getElementById('fileInput');
-    const innerSize = document.getElementById('innerSize');
-    const innerSizeNum = document.getElementById('innerSizeNum');
-    const zoom = document.getElementById('zoom');
-    const zoomNum = document.getElementById('zoomNum');
-    const borderType = document.getElementById('borderType');
-    const borderWidth = document.getElementById('borderWidth');
-    const borderColor = document.getElementById('borderColor');
-    const borderRadius = document.getElementById('borderRadius');
-    const enableShadow = document.getElementById('enableShadow');
-    const shadowColor = document.getElementById('shadowColor');
-    const shadowBlur = document.getElementById('shadowBlur');
+    const innerSize = document.getElementById('innerSize'); const innerSizeNum = document.getElementById('innerSizeNum');
+    const zoom = document.getElementById('zoom'); const zoomNum = document.getElementById('zoomNum');
+    const borderType = document.getElementById('borderType'); const borderWidth = document.getElementById('borderWidth');
+    const borderColor = document.getElementById('borderColor'); const borderRadius = document.getElementById('borderRadius');
+    const enableShadow = document.getElementById('enableShadow'); const shadowColor = document.getElementById('shadowColor'); const shadowBlur = document.getElementById('shadowBlur');
     const resetCropBtn = document.getElementById('resetCropBtn');
 
     // Layer 3
-    const textContent = document.getElementById('textContent');
-    const textFont = document.getElementById('textFont');
-    const loadLocalFontBtn = document.getElementById('loadLocalFontBtn');
+    const textContent = document.getElementById('textContent'); const textFont = document.getElementById('textFont');
     const textColor = document.getElementById('textColor');
-    const textSize = document.getElementById('textSize');
-    const textSizeNum = document.getElementById('textSizeNum');
-    const textAngle = document.getElementById('textAngle');
-    const textAngleNum = document.getElementById('textAngleNum');
-    
-    const enableTextBg = document.getElementById('enableTextBg');
-    const textBgColor = document.getElementById('textBgColor');
-    const textBgAlpha = document.getElementById('textBgAlpha');
-    const enableTextShadow = document.getElementById('enableTextShadow');
-    const textShadowColor = document.getElementById('textShadowColor');
-    
-    const textBorderType = document.getElementById('textBorderType');
-    const textBorderWidth = document.getElementById('textBorderWidth');
-    const textBorderColor = document.getElementById('textBorderColor');
-    const textRadius = document.getElementById('textRadius');
-    const textShadow = document.getElementById('textShadow');
-    const textShadowBoxColor = document.getElementById('textShadowBoxColor');
-    const textShadowBlur = document.getElementById('textShadowBlur');
+    const textSize = document.getElementById('textSize'); const textSizeNum = document.getElementById('textSizeNum');
+    const textAngle = document.getElementById('textAngle'); const textAngleNum = document.getElementById('textAngleNum');
+    const enableTextBg = document.getElementById('enableTextBg'); const textBgColor = document.getElementById('textBgColor'); const textBgAlpha = document.getElementById('textBgAlpha');
+    const enableTextShadow = document.getElementById('enableTextShadow'); const textShadowColor = document.getElementById('textShadowColor');
+    const textBorderType = document.getElementById('textBorderType'); const textBorderWidth = document.getElementById('textBorderWidth');
+    const textBorderColor = document.getElementById('textBorderColor'); const textRadius = document.getElementById('textRadius');
+    const textShadow = document.getElementById('textShadow'); const textShadowBoxColor = document.getElementById('textShadowBoxColor'); const textShadowBlur = document.getElementById('textShadowBlur');
 
     const format = document.getElementById('format');
     const qualityNum = document.getElementById('qualityNum');
-    const editorCanvas = document.getElementById('editorCanvas');
-    const editorWrap = document.getElementById('editorWrap');
+    const editorCanvas = document.getElementById('editorCanvas'); const editorWrap = document.getElementById('editorWrap');
+
+    // 预设系统按钮
+    const exportPresetBtn = document.getElementById('exportPresetBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importInput = document.getElementById('importInput');
 
     // === 主题切换 ===
     const themeToggle = document.getElementById('themeToggle');
@@ -412,16 +407,12 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     let viewScale = 1.0;
     const canvasWrap = document.getElementById('canvasWrap');
     const zoomDisplay = document.getElementById('zoomDisplay');
-    
     function updateViewScale(newScale) {
         viewScale = Math.max(0.1, Math.min(5.0, newScale));
         mainCanvas.style.transform = `scale(${viewScale})`;
         zoomDisplay.textContent = Math.round(viewScale * 100) + '%';
     }
-    canvasWrap.addEventListener('wheel', (e) => {
-        e.preventDefault(); updateViewScale(viewScale + (e.deltaY > 0 ? -0.1 : 0.1));
-    }, {passive: false});
-
+    canvasWrap.addEventListener('wheel', (e) => { e.preventDefault(); updateViewScale(viewScale + (e.deltaY > 0 ? -0.1 : 0.1)); }, {passive: false});
     document.getElementById('zoomIn').addEventListener('click', () => updateViewScale(viewScale + 0.1));
     document.getElementById('zoomOut').addEventListener('click', () => updateViewScale(viewScale - 0.1));
     document.getElementById('zoomReset').addEventListener('click', () => updateViewScale(1));
@@ -437,7 +428,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     syncInput(textSize, textSizeNum, draw);
     syncInput(textAngle, textAngleNum, draw);
 
-    // 背景色禁用联动
     function updateBgColorState(){ bgColor.disabled = transparent.checked; } 
     transparent.addEventListener('change', ()=>{ updateBgColorState(); draw(); }); 
     updateBgColorState();
@@ -450,12 +440,87 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     let dragTarget = null; let dragOffset = { x: 0, y: 0 };
 
     function centerElements() {
-        const w = +canvasW.value; const h = +canvasH.value;
-        iconPos = { x: w / 2, y: h / 2 };
-        textPos = { x: w / 2, y: h * 0.8 }; 
+        // 只在第一次或者用户手动改画布时可以辅助居中，但为了预设逻辑，避免覆盖
+        if(!dragTarget) { // 简单防护
+            const w = +canvasW.value; const h = +canvasH.value;
+            iconPos = { x: w / 2, y: h / 2 };
+            textPos = { x: w / 2, y: h * 0.8 }; 
+        }
     }
     [canvasW, canvasH].forEach(el => el.addEventListener('change', () => { centerElements(); draw(); }));
 
+    // === 图像转 Base64 引擎 (用于预设存储) ===
+    function imgToBase64(img) {
+        if(!img) return null;
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        return c.toDataURL('image/png'); // 保证透明度
+    }
+
+    // === 预设系统逻辑 ===
+    exportPresetBtn.addEventListener('click', () => {
+        const state = { version: 1, ui: {}, pos: { iconPos, textPos }, crop: crop, images: { bg: imgToBase64(bgImg), main: imgToBase64(origImg) } };
+        stateIds.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) state.ui[id] = el.type === 'checkbox' ? el.checked : el.value;
+        });
+        const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
+        const u = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = u; a.download = `cover_preset_${Date.now()}.json`;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+    });
+
+    importBtn.addEventListener('click', () => importInput.click());
+    
+    importInput.addEventListener('change', e => {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const state = JSON.parse(event.target.result);
+                // 1. 恢复 UI 值
+                stateIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(!el || state.ui[id] === undefined) return;
+                    if(el.type === 'checkbox') el.checked = state.ui[id]; else el.value = state.ui[id];
+                    // 同步对应的 Num 框
+                    const numEl = document.getElementById(id + 'Num');
+                    if (numEl) numEl.value = state.ui[id];
+                });
+                updateBgColorState();
+
+                // 2. 恢复坐标与裁切状态
+                if(state.pos) { iconPos = state.pos.iconPos || {x: 150, y: 100}; textPos = state.pos.textPos || {x: 150, y: 160}; }
+                if(state.crop) crop = state.crop;
+
+                // 3. 恢复内嵌图片
+                const loadImg = (b64) => new Promise(resolve => {
+                    if(!b64) return resolve(null);
+                    const i = new Image(); i.onload = () => resolve(i); i.src = b64;
+                });
+                
+                bgImg = await loadImg(state.images.bg);
+                if(bgImg) removeBgImgBtn.style.display = 'block'; else removeBgImgBtn.style.display = 'none';
+
+                origImg = await loadImg(state.images.main);
+                if(origImg) {
+                    editorWrap.style.display = 'block';
+                    generateInnerFromOrig(); // 内部触发 draw
+                } else {
+                    mainImg = null; editorWrap.style.display = 'none'; draw();
+                }
+                
+                alert('预设导入成功！');
+            } catch (err) {
+                alert('读取失败：这不是有效的预设文件！');
+            }
+            importInput.value = ''; 
+        };
+        reader.readAsText(file);
+    });
+
+    // === 画布图形引擎 ===
     function drawRoundRect(ctx, x, y, w, h, r) {
         if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
         ctx.beginPath();
@@ -471,7 +536,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    // === 主画布拖拽核心算法 (支持矩阵旋转) ===
     function getPointerPos(e) {
         const rect = mainCanvas.getBoundingClientRect();
         const scaleX = mainCanvas.width / rect.width;
@@ -483,7 +547,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         const pos = getPointerPos(e);
         dragTarget = null;
 
-        // 1. 文字碰撞检测 (引入逆向旋转矩阵算法)
+        // 文字检测 (逆向矩阵计算)
         const txt = textContent.value;
         if(txt.trim() !== '') {
             const fSize = +textSize.value;
@@ -493,29 +557,22 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             
             const padX = enableTextBg.checked ? fSize * 0.6 : fSize * 0.2;
             const padY = enableTextBg.checked ? fSize * 0.4 : fSize * 0.2;
-            const halfW = tWidth / 2 + padX;
-            const halfH = fSize / 2 + padY;
+            const halfW = tWidth / 2 + padX; const halfH = fSize / 2 + padY;
 
-            // 抵消旋转角度的影响
-            const dx = pos.x - textPos.x;
-            const dy = pos.y - textPos.y;
+            const dx = pos.x - textPos.x; const dy = pos.y - textPos.y;
             const angle = +textAngle.value * Math.PI / 180;
-            const cosA = Math.cos(-angle);
-            const sinA = Math.sin(-angle);
-            // 得到旋转前本地坐标系的点击位置
-            const localX = dx * cosA - dy * sinA;
-            const localY = dx * sinA + dy * cosA;
+            const cosA = Math.cos(-angle); const sinA = Math.sin(-angle);
+            const localX = dx * cosA - dy * sinA; const localY = dx * sinA + dy * cosA;
 
             if(localX >= -halfW && localX <= halfW && localY >= -halfH && localY <= halfH) {
                 dragTarget = 'text';
-                // 记录相对整体中心点的世界坐标差值，拖动时保持相对位置
                 dragOffset = { x: pos.x - textPos.x, y: pos.y - textPos.y };
                 mainCanvas.setPointerCapture(e.pointerId);
                 return;
             }
         }
 
-        // 2. 图标碰撞检测
+        // 图标检测
         if (mainImg) {
             const target = +innerSize.value; 
             const sx = mainImg.naturalWidth, sy = mainImg.naturalHeight; 
@@ -535,11 +592,8 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
     mainCanvas.addEventListener('pointermove', (e) => {
         if (!dragTarget) return;
         const pos = getPointerPos(e);
-        if (dragTarget === 'icon') {
-            iconPos.x = pos.x - dragOffset.x; iconPos.y = pos.y - dragOffset.y;
-        } else if (dragTarget === 'text') {
-            textPos.x = pos.x - dragOffset.x; textPos.y = pos.y - dragOffset.y;
-        }
+        if (dragTarget === 'icon') { iconPos.x = pos.x - dragOffset.x; iconPos.y = pos.y - dragOffset.y; } 
+        else if (dragTarget === 'text') { textPos.x = pos.x - dragOffset.x; textPos.y = pos.y - dragOffset.y; }
         draw();
     });
 
@@ -547,7 +601,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         if (dragTarget) { mainCanvas.releasePointerCapture(e.pointerId); dragTarget = null; }
     });
 
-    // === 左侧小画布拖拽 ===
     let isEdDragging = false, lastEdP = null;
     function updateEditorPreview(){
         if(!origImg) return; const eCtx = editorCanvas.getContext('2d');
@@ -581,8 +634,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         zoom.value = 100; zoomNum.value = 100; generateInnerFromOrig();
     });
 
-
-    // === 核心渲染引擎 ===
     function draw() { 
         const w = +canvasW.value || 300; 
         const h = +canvasH.value || 200; 
@@ -590,7 +641,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         ctx.clearRect(0,0,w,h); 
         ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
         
-        // --- Layer 1: 背景 ---
+        // --- Layer 1 ---
         const pad = +bgPadding.value;
         const bgW = Math.max(1, w - pad * 2); const bgH = Math.max(1, h - pad * 2);
         const bgX = pad; const bgY = pad; const bRad1 = +bgRadius.value;
@@ -598,8 +649,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         ctx.save();
         if (bgShadow.checked) {
             ctx.shadowColor = hexToRgba(bgShadowColor.value, 0.5);
-            ctx.shadowBlur = +bgShadowBlur.value;
-            ctx.shadowOffsetY = +bgShadowBlur.value / 3;
+            ctx.shadowBlur = +bgShadowBlur.value; ctx.shadowOffsetY = +bgShadowBlur.value / 3;
         }
         
         drawRoundRect(ctx, bgX, bgY, bgW, bgH, bRad1);
@@ -627,7 +677,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             ctx.stroke(); ctx.restore();
         }
 
-        // --- Layer 2: 主图 ---
+        // --- Layer 2 ---
         if(mainImg) {
             const target = +innerSize.value; 
             const sx = mainImg.naturalWidth, sy = mainImg.naturalHeight; 
@@ -657,7 +707,7 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             }
         }
 
-        // --- Layer 3: 文字 (支持旋转) ---
+        // --- Layer 3 ---
         const txt = textContent.value;
         if(txt.trim() !== '') {
             ctx.save();
@@ -668,7 +718,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             const tx = textPos.x; const ty = textPos.y;
             const angle = +textAngle.value * Math.PI / 180;
 
-            // 移动原点并旋转
             ctx.translate(tx, ty);
             ctx.rotate(angle);
             
@@ -677,7 +726,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
                 const tWidth = metrics.width;
                 const paddingX = fSize * 0.6; const paddingY = fSize * 0.4;
                 const boxW = tWidth + paddingX * 2; const boxH = fSize + paddingY * 2;
-                // 由于已经平移到了中心，所以盒子的坐标变成负数一半
                 const boxX = 0 - tWidth/2 - paddingX;
                 const boxY = 0 - fSize/2 - paddingY;
                 const boxRad = +textRadius.value;
@@ -706,7 +754,6 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
             }
 
             ctx.fillStyle = textColor.value;
-            // 因为 translate 了，所以文字绘制在 0,0
             ctx.fillText(txt, 0, 0);
             ctx.restore();
         }
@@ -760,20 +807,20 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         }} 
     });
 
-    loadLocalFontBtn.addEventListener('click', async () => {
+    document.getElementById('loadLocalFontBtn').addEventListener('click', async () => {
         if (!window.queryLocalFonts) { alert('浏览器不支持读取本地字体。'); return; }
         try {
             const fonts = await window.queryLocalFonts(); const fontSet = new Set();
             fonts.forEach(f => fontSet.add(f.family));
-            textFont.innerHTML = ''; 
+            const fontSel = document.getElementById('textFont'); fontSel.innerHTML = ''; 
             [...fontSet].sort().forEach(family => {
-                const opt = document.createElement('option'); opt.value = `"${family}", sans-serif`; opt.textContent = family; textFont.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = `"${family}", sans-serif`; opt.textContent = family; fontSel.appendChild(opt);
             });
             alert(`成功加载了 ${fontSet.size} 个本地字体！`);
         } catch (err) { alert('读取字体失败，可能未授予权限。'); }
     });
 
-    downloadBtn.addEventListener('click', ()=>{ 
+    document.getElementById('downloadBtn').addEventListener('click', ()=>{ 
         const mime = format.value; const q = +(qualityNum.value) / 100;
         mainCanvas.toBlob(blob=>{ 
             if(!blob) return; const u = URL.createObjectURL(blob); const a = document.createElement('a'); 
@@ -782,10 +829,11 @@ input[type=checkbox] {accent-color: var(--accent); width:14px; height:14px; curs
         }, mime, q); 
     });
 
-    copyBtn.addEventListener('click', async ()=>{ 
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{ 
         try{ mainCanvas.toBlob(async blob =>{ if(!blob) return; await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('已复制到剪贴板！'); }, 'image/png'); }catch(e){ alert('复制失败'); } 
     });
 
+    // 初始化
     centerElements();
     draw();
   })();
